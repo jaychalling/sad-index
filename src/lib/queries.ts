@@ -28,21 +28,28 @@ export async function getLatestBsi(): Promise<CurrentWeek> {
   const latestDate = latest?.week_date ?? ''
   const prevDate = prev?.week_date ?? ''
 
-  const { data: econRows } = await supabase
-    .from('economic_data')
-    .select('*')
-    .eq('date', latestDate)
+  // Get most recent economic data for each indicator (not exact date match)
+  async function getLatestEconForDate(beforeDate: string) {
+    const indicators = ['SP500', 'VIX', 'UNRATE', 'UMCSENT']
+    const map = new Map<string, number>()
+    for (const ind of indicators) {
+      const { data } = await supabase
+        .from('economic_data')
+        .select('value')
+        .eq('indicator', ind)
+        .lte('date', beforeDate)
+        .order('date', { ascending: false })
+        .limit(1)
+      const rows = data as Pick<EconRow, 'value'>[] | null
+      if (rows?.[0]?.value != null) {
+        map.set(ind, Number(rows[0].value))
+      }
+    }
+    return map
+  }
 
-  const econ = econRows as EconRow[] | null
-  const econMap = new Map(econ?.map((e) => [e.indicator, Number(e.value ?? 0)]) ?? [])
-
-  const { data: prevEconRows } = await supabase
-    .from('economic_data')
-    .select('*')
-    .eq('date', prevDate)
-
-  const prevEcon = prevEconRows as EconRow[] | null
-  const prevEconMap = new Map(prevEcon?.map((e) => [e.indicator, Number(e.value ?? 0)]) ?? [])
+  const econMap = await getLatestEconForDate(latestDate)
+  const prevEconMap = await getLatestEconForDate(prevDate)
 
   function calcChange(indicator: string): number {
     const curr = econMap.get(indicator) ?? 0
@@ -127,6 +134,7 @@ export async function getThisWeekTracks(): Promise<Track[]> {
     .from('track_weekly')
     .select('rank, title, artist, valence')
     .eq('week_date', weekDate)
+    .not('valence', 'is', null)
     .order('rank', { ascending: true })
 
   const tracks = trackRows as Pick<TrackRow, 'rank' | 'title' | 'artist' | 'valence'>[] | null
@@ -135,6 +143,6 @@ export async function getThisWeekTracks(): Promise<Track[]> {
     rank: t.rank,
     title: t.title,
     artist: t.artist,
-    valence: Number(t.valence ?? 0),
+    valence: Number(t.valence),
   }))
 }

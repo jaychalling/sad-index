@@ -1,7 +1,7 @@
 import { ImageResponse } from '@vercel/og'
 import { createClient } from '@supabase/supabase-js'
 
-export const runtime = 'edge'
+export const dynamic = 'force-dynamic'
 
 function getSegment(value: number) {
   if (value < 20) return { label: 'Euphoric', color: '#22c55e', emoji: '😎' }
