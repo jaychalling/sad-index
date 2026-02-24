@@ -95,22 +95,33 @@ export async function getBsiHistory(): Promise<{
     .select('week_date, bsi_score, avg_valence')
     .order('week_date', { ascending: true })
 
-  const { data: sp500Rows } = await supabase
-    .from('economic_data')
-    .select('date, value')
-    .eq('indicator', 'SP500')
-    .order('date', { ascending: true })
+  // Supabase default limit is 1000; we have 3500+ SP500 rows
+  const sp500All: Pick<EconRow, 'date' | 'value'>[] = []
+  let from = 0
+  const pageSize = 1000
+  while (true) {
+    const { data: chunk } = await supabase
+      .from('economic_data')
+      .select('date, value')
+      .eq('indicator', 'SP500')
+      .order('date', { ascending: true })
+      .range(from, from + pageSize - 1)
+    const rows = chunk as Pick<EconRow, 'date' | 'value'>[] | null
+    if (!rows || rows.length === 0) break
+    sp500All.push(...rows)
+    if (rows.length < pageSize) break
+    from += pageSize
+  }
+  const sp500Rows = sp500All
 
   const bsi = bsiRows as Pick<BsiRow, 'week_date' | 'bsi_score' | 'avg_valence'>[] | null
-  const sp500 = sp500Rows as Pick<EconRow, 'date' | 'value'>[] | null
-
   return {
     bsiData: (bsi ?? []).map((d) => ({
       date: d.week_date,
       bsi: Number(d.bsi_score),
       avgValence: Number(d.avg_valence ?? 0),
     })),
-    sp500Data: (sp500 ?? []).map((d) => ({
+    sp500Data: sp500Rows.map((d) => ({
       date: d.date,
       value: Number(d.value ?? 0),
     })),
