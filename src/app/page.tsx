@@ -1,4 +1,5 @@
-import { bsiWeeklyData, sp500Data, currentWeekData, topTracksThisWeek, historicalEvents } from '@/data/bsi-data'
+import { historicalEvents } from '@/data/bsi-data'
+import { getLatestBsi, getBsiHistory, getThisWeekTracks } from '@/lib/queries'
 import Navbar from '@/components/Navbar'
 import BsiGauge from '@/components/BsiGauge'
 import BsiChart from '@/components/BsiChart'
@@ -17,7 +18,9 @@ function getMoodEmoji(bsi: number): string {
   return '\u{1F622}'
 }
 
-export default function Home() {
+export default async function Home() {
+  const [currentWeekData, { bsiData: bsiWeeklyData, sp500Data }, topTracksThisWeek] =
+    await Promise.all([getLatestBsi(), getBsiHistory(), getThisWeekTracks()])
   return (
     <>
       <Navbar />
