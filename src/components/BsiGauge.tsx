@@ -142,7 +142,7 @@ export default function BsiGauge({ value, prevValue }: BsiGaugeProps) {
         <span
           className={`font-bold text-lg ${change > 0 ? 'text-orange' : change < 0 ? 'text-teal' : 'text-navy'}`}
         >
-          {change > 0 ? '\u25B2' : change < 0 ? '\u25BC' : '\u25CF'} {changeSign}{change} from last week
+          {change > 0 ? '\u25B2' : change < 0 ? '\u25BC' : '\u25CF'} {changeSign}{change.toFixed(2)} from last week
         </span>
       </div>
 

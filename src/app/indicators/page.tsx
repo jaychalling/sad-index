@@ -5,7 +5,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Unconventional Economic Indicators — The Vibe Index',
+  title: 'Unconventional Economic Indicators — Sad Index',
   description:
     'From pizza orders predicting wars to skirt lengths forecasting stocks — a curated museum of the weirdest (and surprisingly accurate) economic indicators ever created.',
   openGraph: {
@@ -278,7 +278,7 @@ export default function IndicatorsPage() {
             className="text-2xl md:text-3xl font-bold mb-3"
             style={{ fontFamily: 'var(--font-poppins)' }}
           >
-            The Vibe Index is Live
+            Sad Index is Live
           </h2>
           <p className="text-white/70 max-w-lg mx-auto mb-6 leading-relaxed">
             Unlike most indicators on this list, the Billboard Sadness Index updates

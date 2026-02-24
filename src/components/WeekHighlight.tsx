@@ -75,7 +75,7 @@ export default function WeekHighlight({
 }: WeekHighlightProps) {
   const [copied, setCopied] = useState(false)
 
-  const shareText = `This week's Vibe Index: Most sad track is "${mostSadTrack.title}" by ${mostSadTrack.artist}. Most happy: "${mostHappyTrack.title}" by ${mostHappyTrack.artist}. Check it out at`
+  const shareText = `This week's Sad Index: Most sad track is "${mostSadTrack.title}" by ${mostSadTrack.artist}. Most happy: "${mostHappyTrack.title}" by ${mostHappyTrack.artist}. Check it out at`
   const shareUrl = typeof window !== 'undefined' ? window.location.href : 'https://sadindex.com'
 
   function handleCopy() {

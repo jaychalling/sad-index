@@ -58,7 +58,7 @@ export async function GET() {
             marginBottom: '8px',
           }}
         >
-          The Vibe Index — Billboard Sadness Index
+          Sad Index — Billboard Sadness Index
         </div>
 
         {/* BSI Score */}

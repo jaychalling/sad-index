@@ -55,8 +55,8 @@ export async function getLatestBsi(): Promise<CurrentWeek> {
     const curr = econMap.get(indicator) ?? 0
     const prevVal = prevEconMap.get(indicator)
     if (prevVal == null || prevVal === 0) return 0
-    if (indicator === 'SP500') return Number(((curr - prevVal) / prevVal * 100).toFixed(1))
-    return Number((curr - prevVal).toFixed(1))
+    if (indicator === 'SP500') return Number(((curr - prevVal) / prevVal * 100).toFixed(2))
+    return Number((curr - prevVal).toFixed(2))
   }
 
   const economicIndicators: EconomicIndicators = {
@@ -75,7 +75,7 @@ export async function getLatestBsi(): Promise<CurrentWeek> {
     weekDate: latestDate,
     bsi: bsiScore,
     prevBsi: prevBsi,
-    weeklyChange: Number((bsiScore - prevBsi).toFixed(1)),
+    weeklyChange: Number((bsiScore - prevBsi).toFixed(2)),
     avgValence: Number(latest?.avg_valence ?? 0),
     trackCount: latest?.track_count ?? 100,
     mostSadTrack: sadTrack ?? { title: 'N/A', artist: 'N/A', valence: 0, rank: 0 },

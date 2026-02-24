@@ -19,15 +19,15 @@ const cards = [
     icon: TrendingUp,
     borderColor: 'border-t-teal',
     format: (v: number) => v.toLocaleString(),
-    changeFormat: (c: number) => `${c >= 0 ? '+' : ''}${c.toFixed(1)}%`,
+    changeFormat: (c: number) => `${c >= 0 ? '+' : ''}${c.toFixed(2)}%`,
   },
   {
     key: 'vix' as const,
     label: 'VIX (Fear Index)',
     icon: Activity,
     borderColor: 'border-t-orange',
-    format: (v: number) => v.toFixed(1),
-    changeFormat: (c: number) => `${c >= 0 ? '+' : ''}${c.toFixed(1)}`,
+    format: (v: number) => v.toFixed(2),
+    changeFormat: (c: number) => `${c >= 0 ? '+' : ''}${c.toFixed(2)}`,
     invertColor: true, // VIX going up = bad
   },
   {
@@ -35,8 +35,8 @@ const cards = [
     label: 'Unemployment',
     icon: Users,
     borderColor: 'border-t-amber',
-    format: (v: number) => `${v.toFixed(1)}%`,
-    changeFormat: (c: number) => `${c >= 0 ? '+' : ''}${c.toFixed(1)}%`,
+    format: (v: number) => `${v.toFixed(2)}%`,
+    changeFormat: (c: number) => `${c >= 0 ? '+' : ''}${c.toFixed(2)}%`,
     invertColor: true, // unemployment going up = bad
   },
   {
@@ -44,8 +44,8 @@ const cards = [
     label: 'Consumer Sentiment',
     icon: Heart,
     borderColor: 'border-t-ocean',
-    format: (v: number) => v.toFixed(1),
-    changeFormat: (c: number) => `${c >= 0 ? '+' : ''}${c.toFixed(1)}`,
+    format: (v: number) => v.toFixed(2),
+    changeFormat: (c: number) => `${c >= 0 ? '+' : ''}${c.toFixed(2)}`,
   },
 ]
 

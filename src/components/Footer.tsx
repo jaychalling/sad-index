@@ -11,7 +11,7 @@ export default function Footer() {
               className="font-bold text-lg text-navy mb-2"
               style={{ fontFamily: 'var(--font-poppins)' }}
             >
-              The Vibe Index
+              Sad Index
             </h3>
             <p className="text-sm text-navy/60 leading-relaxed">
               Tracking the emotional temperature of Billboard Hot 100 hits and what it tells us about the economy.
@@ -56,7 +56,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-8 pt-6 border-t-[2px] border-navy/10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs text-navy/50">
-          <p>&copy; 2026 The Vibe Index. Not financial advice.</p>
+          <p>&copy; 2026 Sad Index. Not financial advice.</p>
           <p>
             Built with curiosity and too many sad playlists.
           </p>

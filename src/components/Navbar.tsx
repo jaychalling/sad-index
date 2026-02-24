@@ -19,7 +19,7 @@ export default function Navbar() {
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="font-poppins font-bold text-xl md:text-2xl text-navy tracking-tight hover:text-teal transition-colors" style={{ fontFamily: 'var(--font-poppins)' }}>
-          The Vibe Index
+          Sad Index
         </Link>
 
         {/* Desktop links */}

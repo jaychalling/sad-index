@@ -68,7 +68,7 @@ export default function AboutPage() {
             className="text-3xl md:text-4xl font-bold text-navy mb-2"
             style={{ fontFamily: 'var(--font-poppins)' }}
           >
-            About The Vibe Index
+            About Sad Index
           </h1>
           <p className="text-teal font-medium text-lg">
             Methodology, research, and data sources
@@ -175,7 +175,7 @@ export default function AboutPage() {
           </h2>
           <p className="text-navy/80 leading-relaxed mb-6">
             The relationship between music sentiment and economic conditions is not just anecdotal.
-            Peer-reviewed research supports the core thesis of The Vibe Index.
+            Peer-reviewed research supports the core thesis of Sad Index.
           </p>
 
           <div className="space-y-5">

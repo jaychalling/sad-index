@@ -139,7 +139,7 @@ export default function ThisWeekClient({ currentWeekData, tracks }: ThisWeekClie
                 color: weeklyChange > 0 ? '#9a3412' : '#166534',
               }}
             >
-              {changeSign}{weeklyChange.toFixed(1)} pts
+              {changeSign}{weeklyChange.toFixed(2)} pts
             </span>
             <span className="tag-brutal bg-amber/20 text-navy">
               Avg Valence: {currentWeekData.avgValence.toFixed(3)}
