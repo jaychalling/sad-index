@@ -58,34 +58,30 @@ export default function BsiChart({ bsiData, sp500Data }: BsiChartProps) {
   const [activePeriod, setActivePeriod] = useState('ALL')
 
   const mergedData = useMemo(() => {
-    // Sort S&P data by date for binary-search nearest match
-    const sortedSp500 = [...sp500Data].sort((a, b) => a.date.localeCompare(b.date))
-
-    function findClosestSp500(targetDate: string): number | null {
-      if (sortedSp500.length === 0) return null
-      let lo = 0, hi = sortedSp500.length - 1
-      // Find last entry <= targetDate
-      while (lo < hi) {
-        const mid = Math.ceil((lo + hi) / 2)
-        if (sortedSp500[mid].date <= targetDate) lo = mid
-        else hi = mid - 1
-      }
-      if (sortedSp500[lo].date <= targetDate) return sortedSp500[lo].value
-      return null
-    }
-
-    let filtered = bsiData
     const period = periods.find((p) => p.label === activePeriod)
-    if (period && period.months > 0) {
-      const cutoff = monthsAgo(period.months)
-      filtered = bsiData.filter((d) => new Date(d.date) >= cutoff)
+    const cutoff = period && period.months > 0 ? monthsAgo(period.months) : null
+
+    // Build a map of all dates with their values
+    const dateMap = new Map<string, { bsi: number | null; sp500: number | null }>()
+
+    for (const d of bsiData) {
+      if (cutoff && new Date(d.date) < cutoff) continue
+      dateMap.set(d.date, { bsi: d.bsi, sp500: null })
     }
 
-    return filtered.map((d) => ({
-      date: d.date,
-      bsi: d.bsi,
-      sp500: findClosestSp500(d.date),
-    }))
+    for (const d of sp500Data) {
+      if (cutoff && new Date(d.date) < cutoff) continue
+      const existing = dateMap.get(d.date)
+      if (existing) {
+        existing.sp500 = d.value
+      } else {
+        dateMap.set(d.date, { bsi: null, sp500: d.value })
+      }
+    }
+
+    return Array.from(dateMap.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([date, vals]) => ({ date, bsi: vals.bsi, sp500: vals.sp500 }))
   }, [bsiData, sp500Data, activePeriod])
 
   return (
