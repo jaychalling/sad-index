@@ -58,7 +58,21 @@ export default function BsiChart({ bsiData, sp500Data }: BsiChartProps) {
   const [activePeriod, setActivePeriod] = useState('ALL')
 
   const mergedData = useMemo(() => {
-    const sp500Map = new Map(sp500Data.map((d) => [d.date, d.value]))
+    // Sort S&P data by date for binary-search nearest match
+    const sortedSp500 = [...sp500Data].sort((a, b) => a.date.localeCompare(b.date))
+
+    function findClosestSp500(targetDate: string): number | null {
+      if (sortedSp500.length === 0) return null
+      let lo = 0, hi = sortedSp500.length - 1
+      // Find last entry <= targetDate
+      while (lo < hi) {
+        const mid = Math.ceil((lo + hi) / 2)
+        if (sortedSp500[mid].date <= targetDate) lo = mid
+        else hi = mid - 1
+      }
+      if (sortedSp500[lo].date <= targetDate) return sortedSp500[lo].value
+      return null
+    }
 
     let filtered = bsiData
     const period = periods.find((p) => p.label === activePeriod)
@@ -70,7 +84,7 @@ export default function BsiChart({ bsiData, sp500Data }: BsiChartProps) {
     return filtered.map((d) => ({
       date: d.date,
       bsi: d.bsi,
-      sp500: sp500Map.get(d.date) ?? null,
+      sp500: findClosestSp500(d.date),
     }))
   }, [bsiData, sp500Data, activePeriod])
 
