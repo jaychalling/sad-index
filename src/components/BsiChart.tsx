@@ -58,30 +58,31 @@ export default function BsiChart({ bsiData, sp500Data }: BsiChartProps) {
   const [activePeriod, setActivePeriod] = useState('ALL')
 
   const mergedData = useMemo(() => {
+    const sorted = [...sp500Data].sort((a, b) => a.date.localeCompare(b.date))
+
+    // Binary search: find closest S&P value on or before targetDate
+    function closestSp500(target: string): number | null {
+      if (!sorted.length) return null
+      let lo = 0, hi = sorted.length - 1
+      while (lo < hi) {
+        const mid = Math.ceil((lo + hi) / 2)
+        if (sorted[mid].date <= target) lo = mid; else hi = mid - 1
+      }
+      return sorted[lo].date <= target ? sorted[lo].value : null
+    }
+
     const period = periods.find((p) => p.label === activePeriod)
     const cutoff = period && period.months > 0 ? monthsAgo(period.months) : null
 
-    // Build a map of all dates with their values
-    const dateMap = new Map<string, { bsi: number | null; sp500: number | null }>()
+    const filtered = cutoff
+      ? bsiData.filter((d) => new Date(d.date) >= cutoff)
+      : bsiData
 
-    for (const d of bsiData) {
-      if (cutoff && new Date(d.date) < cutoff) continue
-      dateMap.set(d.date, { bsi: d.bsi, sp500: null })
-    }
-
-    for (const d of sp500Data) {
-      if (cutoff && new Date(d.date) < cutoff) continue
-      const existing = dateMap.get(d.date)
-      if (existing) {
-        existing.sp500 = d.value
-      } else {
-        dateMap.set(d.date, { bsi: null, sp500: d.value })
-      }
-    }
-
-    return Array.from(dateMap.entries())
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([date, vals]) => ({ date, bsi: vals.bsi, sp500: vals.sp500 }))
+    return filtered.map((d) => ({
+      date: d.date,
+      bsi: d.bsi,
+      sp500: closestSp500(d.date),
+    }))
   }, [bsiData, sp500Data, activePeriod])
 
   return (
