@@ -60,7 +60,7 @@ function TrackCard({
           <span>Valence: {(track.valence * 100).toFixed(0)}/100</span>
         </div>
         <ValenceBar
-          valence={isSad ? 1 - track.valence : track.valence}
+          valence={track.valence}
           color={isSad ? '#219ebc' : '#ffb703'}
         />
       </div>
