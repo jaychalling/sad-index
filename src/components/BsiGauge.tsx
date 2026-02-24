@@ -68,7 +68,7 @@ export default function BsiGauge({ value, prevValue }: BsiGaugeProps) {
 
   return (
     <div className="card-brutal text-center max-w-md mx-auto">
-      <svg viewBox="0 0 300 170" className="w-full max-w-[360px] mx-auto">
+      <svg viewBox="0 0 300 190" className="w-full max-w-[360px] mx-auto">
         {/* Gauge arc segments */}
         {segments.map((seg) => (
           <path
@@ -120,7 +120,7 @@ export default function BsiGauge({ value, prevValue }: BsiGaugeProps) {
         {/* Value display */}
         <text
           x={cx}
-          y={cy + 35}
+          y={cy + 45}
           textAnchor="middle"
           className="fill-navy"
           fontSize="36"

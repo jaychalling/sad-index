@@ -118,12 +118,12 @@ export default async function Home() {
                         className="inline-block w-10 text-center font-bold rounded-md py-0.5 text-xs"
                         style={{
                           backgroundColor:
-                            track.valence < 0.3
-                              ? '#8ecae6'
-                              : track.valence < 0.5
+                            track.valence > 0.55
+                              ? '#219ebc'
+                              : track.valence >= 0.35
                                 ? '#ffb703'
-                                : '#22c55e',
-                          color: track.valence < 0.5 ? '#023047' : '#fff',
+                                : '#fb8500',
+                          color: track.valence > 0.55 ? '#fff' : '#023047',
                           border: '2px solid #023047',
                         }}
                       >

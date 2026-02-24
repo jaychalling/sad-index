@@ -19,8 +19,8 @@ function getMoodTag(valence: number): { label: string; color: string; bg: string
 }
 
 function getBarColor(valence: number): string {
-  if (valence > 0.7) return '#219ebc'
-  if (valence >= 0.4) return '#ffb703'
+  if (valence > 0.55) return '#219ebc'
+  if (valence >= 0.35) return '#ffb703'
   return '#fb8500'
 }
 
@@ -179,13 +179,13 @@ export default function ThisWeekClient({ currentWeekData, tracks }: ThisWeekClie
         </div>
         <div className="flex flex-wrap gap-4 mt-4 text-xs text-navy/60">
           <span className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-sm bg-teal border border-navy/20" /> Happy (&gt;0.7)
+            <span className="w-3 h-3 rounded-sm bg-teal border border-navy/20" /> Happy (&gt;0.55)
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-sm bg-amber border border-navy/20" /> Neutral (0.4–0.7)
+            <span className="w-3 h-3 rounded-sm bg-amber border border-navy/20" /> Neutral (0.35–0.55)
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-sm bg-orange border border-navy/20" /> Sad (&lt;0.4)
+            <span className="w-3 h-3 rounded-sm bg-orange border border-navy/20" /> Sad (&lt;0.35)
           </span>
         </div>
       </div>
