@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-ocean: #8ecae6;
+  --color-teal: #219ebc;
+  --color-navy: #023047;
+  --color-amber: #ffb703;
+  --color-orange: #fb8500;
+
+  --shadow-brutal: 4px 4px 0 #023047;
+  --shadow-brutal-sm: 2px 2px 0 #023047;
+  --shadow-brutal-lg: 6px 6px 0 #023047;
+  --border-brutal: 3px solid #023047;
+}
+
+@layer base {
+  body {
+    @apply bg-ocean/20 text-navy;
+    font-family: var(--font-inter), system-ui, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-poppins), system-ui, sans-serif;
+  }
+}
+
+@layer components {
+  .card-brutal {
+    @apply bg-white rounded-lg p-6;
+    border: var(--border-brutal);
+    box-shadow: var(--shadow-brutal);
+  }
+
+  .card-brutal:hover {
+    box-shadow: var(--shadow-brutal-lg);
+    transform: translate(-2px, -2px);
+    transition: all 0.15s ease;
+  }
+
+  .btn-brutal {
+    @apply px-5 py-2.5 font-semibold rounded-lg cursor-pointer;
+    border: var(--border-brutal);
+    box-shadow: var(--shadow-brutal-sm);
+    transition: all 0.1s ease;
+  }
+
+  .btn-brutal:hover {
+    box-shadow: var(--shadow-brutal);
+    transform: translate(-1px, -1px);
+  }
+
+  .btn-brutal:active {
+    box-shadow: none;
+    transform: translate(2px, 2px);
+  }
+
+  .tag-brutal {
+    @apply inline-block px-3 py-1 text-sm font-semibold rounded-md;
+    border: 2px solid var(--color-navy);
+    box-shadow: var(--shadow-brutal-sm);
+  }
+}
