@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { getLatestBsi, getBsiHistory, getThisWeekTracks, getHistoricalEventsWithBsi } from '@/lib/queries'
 import Navbar from '@/components/Navbar'
 import BsiGauge from '@/components/BsiGauge'
+import MiniGauge from '@/components/MiniGauge'
 import EconDashboard from '@/components/EconDashboard'
 import WeekHighlight from '@/components/WeekHighlight'
 import Newsletter from '@/components/Newsletter'
@@ -69,6 +70,44 @@ function getSignal(bsi: number) {
     description: 'Rare state. Charts dominated by dark music. Usually tied to national tragedy or deep social crisis.',
   }
 }
+
+// ─── Derived Index Scores ────────────────────────────────────────────────
+
+function vixToFear(vix: number): number {
+  return Math.min(100, Math.max(0, (vix - 10) * 2.5))
+}
+
+function umcsentToGloom(umcsent: number): number {
+  return Math.min(100, Math.max(0, 100 - umcsent))
+}
+
+function unrateToAnxiety(unrate: number): number {
+  return Math.min(100, Math.max(0, (unrate - 2) * 7.7))
+}
+
+const fearSegments = [
+  { min: 0, max: 20, label: 'Calm', color: '#22c55e' },
+  { min: 20, max: 40, label: 'Normal', color: '#4ade80' },
+  { min: 40, max: 60, label: 'Elevated', color: '#ffb703' },
+  { min: 60, max: 80, label: 'High Fear', color: '#f87171' },
+  { min: 80, max: 100, label: 'Extreme', color: '#ef4444' },
+]
+
+const gloomSegments = [
+  { min: 0, max: 20, label: 'Optimistic', color: '#22c55e' },
+  { min: 20, max: 40, label: 'Content', color: '#4ade80' },
+  { min: 40, max: 60, label: 'Uncertain', color: '#ffb703' },
+  { min: 60, max: 80, label: 'Pessimistic', color: '#f87171' },
+  { min: 80, max: 100, label: 'Despair', color: '#ef4444' },
+]
+
+const anxietySegments = [
+  { min: 0, max: 20, label: 'Strong Jobs', color: '#22c55e' },
+  { min: 20, max: 40, label: 'Healthy', color: '#4ade80' },
+  { min: 40, max: 60, label: 'Moderate', color: '#ffb703' },
+  { min: 60, max: 80, label: 'Stressed', color: '#f87171' },
+  { min: 80, max: 100, label: 'Crisis', color: '#ef4444' },
+]
 
 function formatWeekDate(dateStr: string): string {
   const date = new Date(dateStr + 'T00:00:00')
@@ -246,9 +285,52 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* ═══ SECTION 3: BSI Gauge ═══ */}
+        {/* ═══ SECTION 3: Vibe Dashboard — 4 Gauges ═══ */}
         <section>
-          <BsiGauge value={bsi} prevValue={currentWeekData.prevBsi} />
+          <h2
+            className="text-xl font-bold text-navy mb-4"
+            style={{ fontFamily: 'var(--font-poppins)' }}
+          >
+            The National Mood
+          </h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="md:col-span-2 lg:col-span-1">
+              <MiniGauge
+                value={bsi}
+                prevValue={currentWeekData.prevBsi}
+                title="Music Sadness"
+                source="Billboard Hot 100 Valence"
+                segments={[
+                  { min: 0, max: 20, label: 'Euphoric', color: '#22c55e' },
+                  { min: 20, max: 40, label: 'Happy', color: '#4ade80' },
+                  { min: 40, max: 60, label: 'Mixed', color: '#ffb703' },
+                  { min: 60, max: 80, label: 'Sad', color: '#f87171' },
+                  { min: 80, max: 100, label: 'Very Sad', color: '#ef4444' },
+                ]}
+              />
+            </div>
+            <MiniGauge
+              value={vixToFear(ind.vix.value)}
+              prevValue={vixToFear(ind.vix.value - ind.vix.change)}
+              title="Market Fear"
+              source={`VIX: ${ind.vix.value.toFixed(1)}`}
+              segments={fearSegments}
+            />
+            <MiniGauge
+              value={umcsentToGloom(ind.consumerSentiment.value)}
+              prevValue={umcsentToGloom(ind.consumerSentiment.value - ind.consumerSentiment.change)}
+              title="Consumer Gloom"
+              source={`UMCSENT: ${ind.consumerSentiment.value.toFixed(1)}`}
+              segments={gloomSegments}
+            />
+            <MiniGauge
+              value={unrateToAnxiety(ind.unemployment.value)}
+              prevValue={unrateToAnxiety(ind.unemployment.value - ind.unemployment.change)}
+              title="Job Anxiety"
+              source={`Unemployment: ${ind.unemployment.value.toFixed(1)}%`}
+              segments={anxietySegments}
+            />
+          </div>
         </section>
 
         {/* ═══ SECTION 4: BSI vs Economy (Interactive Chart) ═══ */}
