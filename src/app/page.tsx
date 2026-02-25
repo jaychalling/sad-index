@@ -6,7 +6,7 @@ import EconDashboard from '@/components/EconDashboard'
 import WeekHighlight from '@/components/WeekHighlight'
 import Newsletter from '@/components/Newsletter'
 import Footer from '@/components/Footer'
-import { Calendar, ArrowRight } from 'lucide-react'
+import { Calendar, ArrowRight, TrendingUp, Activity, Users, Heart, Music } from 'lucide-react'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
@@ -26,6 +26,14 @@ const datasetSchema = {
   creator: { '@type': 'Organization', name: 'Sad Index' },
 }
 
+// ─── Helpers ────────────────────────────────────────────────────────────────
+
+function getMoodLabel(bsi: number): { text: string; color: string } {
+  if (bsi < 30) return { text: 'Happy', color: '#22c55e' }
+  if (bsi < 50) return { text: 'Mixed', color: '#ffb703' }
+  return { text: 'Sad', color: '#ef4444' }
+}
+
 function getMoodEmoji(bsi: number): string {
   if (bsi < 20) return '\u{1F60E}'
   if (bsi < 40) return '\u{1F60A}'
@@ -34,15 +42,51 @@ function getMoodEmoji(bsi: number): string {
   return '\u{1F622}'
 }
 
-function getMoodLabel(bsi: number): { text: string; color: string } {
-  if (bsi < 30) return { text: 'Happy', color: '#22c55e' }
-  if (bsi < 50) return { text: 'Mixed', color: '#ffb703' }
-  return { text: 'Sad', color: '#ef4444' }
+function getSignal(bsi: number) {
+  if (bsi < 30) return {
+    level: 'ESCAPISM',
+    color: '#fb8500',
+    description: 'Charts are unusually bright. In past recessions (2008, 2020), BSI dropped to the 20s as people sought escapist music.',
+  }
+  if (bsi < 45) return {
+    level: 'ELEVATED',
+    color: '#ffb703',
+    description: 'Upbeat mood on the charts. Continued brightening could signal underlying economic stress.',
+  }
+  if (bsi < 55) return {
+    level: 'NEUTRAL',
+    color: '#219ebc',
+    description: 'The charts reflect a normal emotional range. No unusual escapism or darkness detected.',
+  }
+  if (bsi < 70) return {
+    level: 'REFLECTIVE',
+    color: '#8ecae6',
+    description: 'Sadder songs gaining traction — society is processing something. Often coincides with cultural reflection.',
+  }
+  return {
+    level: 'SOMBER',
+    color: '#ef4444',
+    description: 'Rare state. Charts dominated by dark music. Usually tied to national tragedy or deep social crisis.',
+  }
 }
+
+function formatWeekDate(dateStr: string): string {
+  const date = new Date(dateStr + 'T00:00:00')
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
+// ─── Page ───────────────────────────────────────────────────────────────────
 
 export default async function Home() {
   const [currentWeekData, { bsiData: bsiWeeklyData, econData }, topTracksThisWeek, enrichedEvents] =
     await Promise.all([getLatestBsi(), getBsiHistory(), getThisWeekTracks(), getHistoricalEventsWithBsi()])
+
+  const bsi = currentWeekData.bsi
+  const mood = getMoodLabel(bsi)
+  const signal = getSignal(bsi)
+  const change = currentWeekData.weeklyChange
+  const ind = currentWeekData.economicIndicators
+
   return (
     <>
       <script
@@ -51,66 +95,167 @@ export default async function Home() {
       />
       <Navbar />
 
-      <main className="max-w-6xl mx-auto px-4 py-8 space-y-12">
-        {/* Hero */}
-        <section className="text-center py-8">
-          <h1
-            className="text-4xl md:text-5xl font-extrabold text-navy mb-4 leading-tight"
-            style={{ fontFamily: 'var(--font-poppins)' }}
-          >
-            Is America Sad Right Now?
-          </h1>
-          <p className="text-lg text-navy/70 max-w-2xl mx-auto leading-relaxed">
-            The Billboard Sadness Index (BSI) measures the emotional tone of the Hot 100.
-            When the charts get gloomy, recessions often follow. Here&apos;s what the music says today.
-          </p>
-        </section>
+      <main className="max-w-6xl mx-auto px-4 py-8 space-y-10">
 
-        {/* BSI Gauge */}
-        <section>
-          <BsiGauge value={currentWeekData.bsi} prevValue={currentWeekData.prevBsi} />
-        </section>
+        {/* ═══ SECTION 1: Dashboard Hero ═══ */}
+        <section className="grid md:grid-cols-5 gap-4">
+          {/* BSI Main Display */}
+          <div className="md:col-span-3 card-brutal !bg-navy text-white relative overflow-hidden">
+            <div
+              className="absolute top-2 right-4 text-[100px] font-extrabold opacity-[0.04] leading-none select-none pointer-events-none"
+              style={{ fontFamily: 'var(--font-poppins)' }}
+            >
+              BSI
+            </div>
+            <div className="relative">
+              <div className="flex items-center gap-2 mb-4">
+                <Music size={16} className="text-ocean" />
+                <h1 className="text-xs font-bold uppercase tracking-widest text-ocean">
+                  Billboard Sadness Index
+                </h1>
+              </div>
+              <div className="flex items-end gap-4 mb-3">
+                <span
+                  className="text-6xl md:text-7xl font-extrabold leading-none"
+                  style={{ fontFamily: 'var(--font-poppins)' }}
+                >
+                  {bsi}
+                </span>
+                <div className="pb-2 flex items-center gap-2">
+                  <span className="text-3xl">{getMoodEmoji(bsi)}</span>
+                  <span
+                    className="tag-brutal !border-white/30 text-sm"
+                    style={{ backgroundColor: mood.color, color: mood.color === '#ffb703' ? '#023047' : '#fff' }}
+                  >
+                    {mood.text}
+                  </span>
+                </div>
+              </div>
+              <div className="flex flex-wrap items-center gap-3 text-sm">
+                <span className={change > 0 ? 'text-orange' : change < 0 ? 'text-happy' : 'text-white/60'}>
+                  {change > 0 ? '\u25B2' : change < 0 ? '\u25BC' : '\u25CF'}{' '}
+                  {change > 0 ? '+' : ''}{change.toFixed(1)} from last week
+                </span>
+                <span className="text-white/30">|</span>
+                <span className="text-white/60">Week of {formatWeekDate(currentWeekData.weekDate)}</span>
+              </div>
+            </div>
+          </div>
 
-        {/* Economic Indicators + BSI Comparison Chart */}
-        <EconDashboard
-          indicators={currentWeekData.economicIndicators}
-          bsiData={bsiWeeklyData}
-          econData={econData}
-        />
-
-        {/* Why Track Music Mood? */}
-        <section>
-          <h2
-            className="text-xl font-bold text-navy mb-4"
-            style={{ fontFamily: 'var(--font-poppins)' }}
-          >
-            Why Track Music Mood?
-          </h2>
-          <div className="card-brutal">
-            <p className="text-navy/80 leading-relaxed mb-4">
-              The Billboard Sadness Index (BSI) measures the emotional tone of America&apos;s most popular music
-              every week. By analyzing the acoustic valence of all 100 songs on the Billboard Hot 100 chart —
-              weighted by rank — we produce a single number from 0 (euphoric) to 100 (somber) that captures
-              the nation&apos;s musical mood.
-            </p>
-            <p className="text-navy/80 leading-relaxed mb-4">
-              Here&apos;s the counter-intuitive insight: when the economy crashes, the charts don&apos;t get
-              sadder — they get <strong className="text-teal">brighter</strong>. People reach for escapist
-              music during hard times. Lady Gaga and Kesha dominated during the 2008 financial crisis. Dance
-              hits surged after COVID lockdowns. Economists call this phenomenon{' '}
-              <strong className="text-orange">&ldquo;Recession Pop.&rdquo;</strong>
-            </p>
-            <p className="text-navy/80 leading-relaxed">
-              Peer-reviewed research from the Journal of Financial Economics (Edmans et al., 2022) confirms
-              that music sentiment predicts stock returns across 40 countries. The BSI shows the strongest
-              correlation with the VIX fear index (r&nbsp;=&nbsp;-0.47), with musical mood shifts leading
-              economic indicators by approximately 3 months. When BSI drops below 30, it may signal underlying
-              economic anxiety masked by musical escapism.
+          {/* Recession Pop Signal */}
+          <div className="md:col-span-2 card-brutal border-l-[6px] flex flex-col justify-between" style={{ borderLeftColor: signal.color }}>
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <Activity size={16} className="text-navy/60" />
+                <span className="text-[10px] font-bold uppercase tracking-widest text-navy/60">
+                  Recession Pop Signal
+                </span>
+              </div>
+              <span
+                className="inline-block tag-brutal !text-xs font-extrabold mb-3"
+                style={{ backgroundColor: signal.color, color: '#fff', borderColor: signal.color }}
+              >
+                {signal.level}
+              </span>
+              <p className="text-sm text-navy/70 leading-relaxed">
+                {signal.description}
+              </p>
+            </div>
+            <p className="text-[10px] text-navy/40 mt-4">
+              Based on BSI correlation with VIX (r&nbsp;=&nbsp;&minus;0.47, 3-month lead)
             </p>
           </div>
         </section>
 
-        {/* This Week's Mood */}
+        {/* ═══ SECTION 2: Index Ticker Strip ═══ */}
+        <section>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+            {/* BSI */}
+            <div className="card-brutal !p-3 border-t-[4px] border-t-teal !shadow-[3px_3px_0_#023047]">
+              <div className="flex items-center gap-1.5 mb-1">
+                <Music size={14} className="text-teal" />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-navy/60">BSI</span>
+              </div>
+              <div className="text-xl font-bold text-navy" style={{ fontFamily: 'var(--font-poppins)' }}>
+                {bsi}
+              </div>
+              <div className={`text-xs font-semibold ${change > 0 ? 'text-orange' : change < 0 ? 'text-teal' : 'text-navy/50'}`}>
+                {change > 0 ? '\u25B2' : change < 0 ? '\u25BC' : '\u25CF'} {Math.abs(change).toFixed(1)}
+              </div>
+            </div>
+
+            {/* S&P 500 */}
+            <div className="card-brutal !p-3 border-t-[4px] border-t-teal !shadow-[3px_3px_0_#023047]">
+              <div className="flex items-center gap-1.5 mb-1">
+                <TrendingUp size={14} className="text-teal" />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-navy/60">S&P 500</span>
+              </div>
+              <div className="text-xl font-bold text-navy" style={{ fontFamily: 'var(--font-poppins)' }}>
+                {ind.sp500.value.toLocaleString()}
+              </div>
+              <div className={`text-xs font-semibold ${ind.sp500.change >= 0 ? 'text-teal' : 'text-orange'}`}>
+                {ind.sp500.change >= 0 ? '\u25B2' : '\u25BC'} {Math.abs(ind.sp500.change).toFixed(2)}%
+              </div>
+            </div>
+
+            {/* VIX */}
+            <div className="card-brutal !p-3 border-t-[4px] border-t-orange !shadow-[3px_3px_0_#023047]">
+              <div className="flex items-center gap-1.5 mb-1">
+                <Activity size={14} className="text-orange" />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-navy/60">VIX</span>
+                <span className="text-[8px] font-bold text-white bg-orange px-1 rounded">TOP r</span>
+              </div>
+              <div className="text-xl font-bold text-navy" style={{ fontFamily: 'var(--font-poppins)' }}>
+                {ind.vix.value.toFixed(2)}
+              </div>
+              <div className={`text-xs font-semibold ${ind.vix.change <= 0 ? 'text-teal' : 'text-orange'}`}>
+                {ind.vix.change >= 0 ? '\u25B2' : '\u25BC'} {Math.abs(ind.vix.change).toFixed(2)}
+              </div>
+            </div>
+
+            {/* Unemployment */}
+            <div className="card-brutal !p-3 border-t-[4px] border-t-amber !shadow-[3px_3px_0_#023047]">
+              <div className="flex items-center gap-1.5 mb-1">
+                <Users size={14} className="text-amber" />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-navy/60">Unemployment</span>
+              </div>
+              <div className="text-xl font-bold text-navy" style={{ fontFamily: 'var(--font-poppins)' }}>
+                {ind.unemployment.value.toFixed(1)}%
+              </div>
+              <div className={`text-xs font-semibold ${ind.unemployment.change <= 0 ? 'text-teal' : 'text-orange'}`}>
+                {ind.unemployment.change >= 0 ? '\u25B2' : '\u25BC'} {Math.abs(ind.unemployment.change).toFixed(2)}%
+              </div>
+            </div>
+
+            {/* Consumer Sentiment */}
+            <div className="card-brutal !p-3 border-t-[4px] border-t-ocean !shadow-[3px_3px_0_#023047]">
+              <div className="flex items-center gap-1.5 mb-1">
+                <Heart size={14} className="text-ocean" />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-navy/60">Sentiment</span>
+              </div>
+              <div className="text-xl font-bold text-navy" style={{ fontFamily: 'var(--font-poppins)' }}>
+                {ind.consumerSentiment.value.toFixed(1)}
+              </div>
+              <div className={`text-xs font-semibold ${ind.consumerSentiment.change >= 0 ? 'text-teal' : 'text-orange'}`}>
+                {ind.consumerSentiment.change >= 0 ? '\u25B2' : '\u25BC'} {Math.abs(ind.consumerSentiment.change).toFixed(2)}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══ SECTION 3: BSI Gauge ═══ */}
+        <section>
+          <BsiGauge value={bsi} prevValue={currentWeekData.prevBsi} />
+        </section>
+
+        {/* ═══ SECTION 4: BSI vs Economy (Interactive Chart) ═══ */}
+        <EconDashboard
+          indicators={ind}
+          bsiData={bsiWeeklyData}
+          econData={econData}
+        />
+
+        {/* ═══ SECTION 5: This Week's Mood ═══ */}
         <section>
           <WeekHighlight
             weekDate={currentWeekData.weekDate}
@@ -119,7 +264,7 @@ export default async function Home() {
           />
         </section>
 
-        {/* Top Tracks Preview */}
+        {/* ═══ SECTION 6: Hot 100 Valence Snapshot ═══ */}
         <section>
           <div className="flex items-center justify-between mb-4">
             <h2
@@ -181,7 +326,7 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* Historical Highlights */}
+        {/* ═══ SECTION 7: Historical Highlights ═══ */}
         <section>
           <h2
             className="text-xl font-bold text-navy mb-4"
@@ -202,11 +347,11 @@ export default async function Home() {
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-xs font-bold text-navy/50">{event.date}</span>
                     {(() => {
-                      const bsi = event.bsi ?? 0
-                      const mood = getMoodLabel(bsi)
+                      const evtBsi = event.bsi ?? 0
+                      const evtMood = getMoodLabel(evtBsi)
                       return (
-                        <span className="tag-brutal !text-[10px] !px-2 !py-0 font-bold" style={{ backgroundColor: mood.color + '25', color: mood.color }}>
-                          {mood.text} · BSI {bsi}
+                        <span className="tag-brutal !text-[10px] !px-2 !py-0 font-bold" style={{ backgroundColor: evtMood.color + '25', color: evtMood.color }}>
+                          {evtMood.text} &middot; BSI {evtBsi}
                         </span>
                       )
                     })()}
@@ -226,7 +371,39 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* Newsletter */}
+        {/* ═══ SECTION 8: Why Track Music Mood? (SEO) ═══ */}
+        <section>
+          <h2
+            className="text-xl font-bold text-navy mb-4"
+            style={{ fontFamily: 'var(--font-poppins)' }}
+          >
+            Why Track Music Mood?
+          </h2>
+          <div className="card-brutal">
+            <p className="text-navy/80 leading-relaxed mb-4">
+              The Billboard Sadness Index (BSI) measures the emotional tone of America&apos;s most popular music
+              every week. By analyzing the acoustic valence of all 100 songs on the Billboard Hot 100 chart —
+              weighted by rank — we produce a single number from 0 (euphoric) to 100 (somber) that captures
+              the nation&apos;s musical mood.
+            </p>
+            <p className="text-navy/80 leading-relaxed mb-4">
+              Here&apos;s the counter-intuitive insight: when the economy crashes, the charts don&apos;t get
+              sadder — they get <strong className="text-teal">brighter</strong>. People reach for escapist
+              music during hard times. Lady Gaga and Kesha dominated during the 2008 financial crisis. Dance
+              hits surged after COVID lockdowns. Economists call this phenomenon{' '}
+              <strong className="text-orange">&ldquo;Recession Pop.&rdquo;</strong>
+            </p>
+            <p className="text-navy/80 leading-relaxed">
+              Peer-reviewed research from the Journal of Financial Economics (Edmans et al., 2022) confirms
+              that music sentiment predicts stock returns across 40 countries. The BSI shows the strongest
+              correlation with the VIX fear index (r&nbsp;=&nbsp;&minus;0.47), with musical mood shifts leading
+              economic indicators by approximately 3 months. When BSI drops below 30, it may signal underlying
+              economic anxiety masked by musical escapism.
+            </p>
+          </div>
+        </section>
+
+        {/* ═══ SECTION 9: Newsletter ═══ */}
         <section>
           <Newsletter />
         </section>
