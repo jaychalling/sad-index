@@ -13,22 +13,22 @@ import {
 import type { Track, CurrentWeek } from '@/data/bsi-data'
 
 function getMoodTag(valence: number): { label: string; color: string; bg: string } {
-  if (valence > 0.7) return { label: 'Happy', color: '#166534', bg: '#dcfce7' }
-  if (valence >= 0.4) return { label: 'Neutral', color: '#92400e', bg: '#fef3c7' }
-  return { label: 'Sad', color: '#9a3412', bg: '#ffedd5' }
+  if (valence > 0.55) return { label: 'Happy', color: '#166534', bg: '#dcfce7' }
+  if (valence >= 0.35) return { label: 'Neutral', color: '#92400e', bg: '#fef3c7' }
+  return { label: 'Sad', color: '#991b1b', bg: '#fee2e2' }
 }
 
 function getBarColor(valence: number): string {
-  if (valence > 0.55) return '#219ebc'
+  if (valence > 0.55) return '#22c55e'
   if (valence >= 0.35) return '#ffb703'
-  return '#fb8500'
+  return '#ef4444'
 }
 
 function getBsiLabel(bsi: number): { label: string; color: string } {
   if (bsi <= 20) return { label: 'Euphoric', color: '#22c55e' }
-  if (bsi <= 40) return { label: 'Bright', color: '#8ecae6' }
+  if (bsi <= 40) return { label: 'Bright', color: '#22c55e' }
   if (bsi <= 60) return { label: 'Neutral', color: '#ffb703' }
-  if (bsi <= 80) return { label: 'Moody', color: '#fb8500' }
+  if (bsi <= 80) return { label: 'Moody', color: '#ef4444' }
   return { label: 'Dark', color: '#ef4444' }
 }
 
@@ -135,8 +135,8 @@ export default function ThisWeekClient({ currentWeekData, tracks }: ThisWeekClie
             <span
               className="tag-brutal font-bold"
               style={{
-                backgroundColor: weeklyChange > 0 ? '#ffedd5' : '#dcfce7',
-                color: weeklyChange > 0 ? '#9a3412' : '#166534',
+                backgroundColor: weeklyChange > 0 ? '#fee2e2' : '#dcfce7',
+                color: weeklyChange > 0 ? '#991b1b' : '#166534',
               }}
             >
               {changeSign}{weeklyChange.toFixed(2)} pts
@@ -179,13 +179,13 @@ export default function ThisWeekClient({ currentWeekData, tracks }: ThisWeekClie
         </div>
         <div className="flex flex-wrap gap-4 mt-4 text-xs text-navy/60">
           <span className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-sm bg-teal border border-navy/20" /> Happy (&gt;0.55)
+            <span className="w-3 h-3 rounded-sm bg-happy border border-navy/20" /> Happy (&gt;0.55)
           </span>
           <span className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-sm bg-amber border border-navy/20" /> Neutral (0.35–0.55)
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-sm bg-orange border border-navy/20" /> Sad (&lt;0.35)
+            <span className="w-3 h-3 rounded-sm bg-sad border border-navy/20" /> Sad (&lt;0.35)
           </span>
         </div>
       </div>
@@ -218,8 +218,13 @@ export default function ThisWeekClient({ currentWeekData, tracks }: ThisWeekClie
                   <td className="py-3 px-2 text-navy/70 hidden md:table-cell">{track.artist}</td>
                   <td className="py-3 px-2">
                     <div className="flex items-center gap-2">
-                      <div className="w-16 md:w-24 h-3 bg-navy/10 rounded-full overflow-hidden border border-navy/20">
-                        <div className="h-full rounded-full" style={{ width: `${track.valence * 100}%`, backgroundColor: getBarColor(track.valence) }} />
+                      <div className="w-16 md:w-24 h-3 bg-navy/5 rounded-full overflow-hidden border border-navy/20 relative">
+                        <div className="absolute left-1/2 top-0 bottom-0 w-px bg-navy/20 z-10" />
+                        {track.valence >= 0.5 ? (
+                          <div className="absolute top-0 bottom-0 rounded-r-full" style={{ left: '50%', width: `${((track.valence - 0.5) / 0.5) * 50}%`, backgroundColor: '#22c55e' }} />
+                        ) : (
+                          <div className="absolute top-0 bottom-0 rounded-l-full" style={{ right: '50%', width: `${((0.5 - track.valence) / 0.5) * 50}%`, backgroundColor: '#ef4444' }} />
+                        )}
                       </div>
                       <span className="text-navy font-mono text-xs">{track.valence.toFixed(2)}</span>
                     </div>

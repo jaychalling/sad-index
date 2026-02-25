@@ -1,14 +1,43 @@
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import HistoryClient from '@/components/HistoryClient'
-import { historicalEvents } from '@/data/bsi-data'
-import { getBsiHistory } from '@/lib/queries'
+import { getBsiHistory, getHistoricalEventsWithBsi } from '@/lib/queries'
+import Link from 'next/link'
+import { ArrowRight } from 'lucide-react'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'BSI History — 25 Years of Billboard Mood Data (2000–2026)',
+  description:
+    'Explore 25 years of Billboard mood data. See how chart sadness predicted the 2008 crash, COVID, and more. Interactive timeline with economic overlay.',
+  openGraph: {
+    title: 'BSI History: 25 Years of Billboard Mood Data',
+    description:
+      'Interactive timeline of Billboard emotional valence from 2000 to present, overlaid with economic indicators.',
+  },
+  alternates: {
+    canonical: '/history',
+  },
+}
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://sadindex.com' },
+    { '@type': 'ListItem', position: 2, name: 'History' },
+  ],
+}
 
 export default async function HistoryPage() {
-  const { bsiData } = await getBsiHistory()
+  const [{ bsiData, econData }, enrichedEvents] = await Promise.all([getBsiHistory(), getHistoricalEventsWithBsi()])
 
   return (
     <div className="min-h-screen flex flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <Navbar />
       <main className="flex-1 max-w-6xl mx-auto px-4 py-10 w-full">
         <div className="mb-10">
@@ -22,7 +51,25 @@ export default async function HistoryPage() {
             2000 to Present — 25 years of musical mood data
           </p>
         </div>
-        <HistoryClient bsiData={bsiData} historicalEvents={historicalEvents} />
+        <HistoryClient bsiData={bsiData} historicalEvents={enrichedEvents.filter(e => e.date >= '2000-01-01')} umcsentData={econData['UMCSENT'] ?? []} />
+
+        {/* Related Pages */}
+        <section className="mt-12 grid sm:grid-cols-2 gap-4">
+          <Link href="/this-week" className="card-brutal flex items-center justify-between group">
+            <div>
+              <p className="font-bold text-navy" style={{ fontFamily: 'var(--font-poppins)' }}>This Week&apos;s Data</p>
+              <p className="text-sm text-navy/60">Current BSI score & track breakdown</p>
+            </div>
+            <ArrowRight size={18} className="text-teal group-hover:translate-x-1 transition-transform" />
+          </Link>
+          <Link href="/about" className="card-brutal flex items-center justify-between group">
+            <div>
+              <p className="font-bold text-navy" style={{ fontFamily: 'var(--font-poppins)' }}>Our Methodology</p>
+              <p className="text-sm text-navy/60">How BSI is calculated & research</p>
+            </div>
+            <ArrowRight size={18} className="text-teal group-hover:translate-x-1 transition-transform" />
+          </Link>
+        </section>
       </main>
       <Footer />
     </div>

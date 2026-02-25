@@ -5,9 +5,9 @@ export const runtime = 'edge'
 
 function getSegment(value: number) {
   if (value < 20) return { label: 'Euphoric', color: '#22c55e', emoji: '😎' }
-  if (value < 40) return { label: 'Bright', color: '#8ecae6', emoji: '😊' }
+  if (value < 40) return { label: 'Bright', color: '#4ade80', emoji: '😊' }
   if (value < 60) return { label: 'Neutral', color: '#ffb703', emoji: '😐' }
-  if (value < 80) return { label: 'Moody', color: '#fb8500', emoji: '😔' }
+  if (value < 80) return { label: 'Moody', color: '#f87171', emoji: '😔' }
   return { label: 'Dark', color: '#ef4444', emoji: '😢' }
 }
 

@@ -84,48 +84,81 @@ export async function getLatestBsi(): Promise<CurrentWeek> {
   }
 }
 
-// ─── BSI History + S&P 500 (Home page chart, History page) ────────────────
+// ─── BSI History + Economic Data (History page) ─────────────────────────────
 
-export async function getBsiHistory(): Promise<{
-  bsiData: BsiDataPoint[]
-  sp500Data: Sp500DataPoint[]
-}> {
-  const { data: bsiRows } = await supabase
-    .from('bsi_weekly')
-    .select('week_date, bsi_score, avg_valence')
-    .order('week_date', { ascending: true })
+export interface EconTimeSeries {
+  date: string
+  value: number
+}
 
-  // Supabase default limit is 1000; we have 3500+ SP500 rows
-  const sp500All: Pick<EconRow, 'date' | 'value'>[] = []
+async function fetchPaginated(
+  table: string,
+  select: string,
+  filters: Record<string, string>,
+  orderBy: string,
+): Promise<Record<string, unknown>[]> {
+  const all: Record<string, unknown>[] = []
   let from = 0
   const pageSize = 1000
   while (true) {
-    const { data: chunk } = await supabase
-      .from('economic_data')
-      .select('date, value')
-      .eq('indicator', 'SP500')
-      .order('date', { ascending: true })
-      .range(from, from + pageSize - 1)
-    const rows = chunk as Pick<EconRow, 'date' | 'value'>[] | null
-    if (!rows || rows.length === 0) break
-    sp500All.push(...rows)
-    if (rows.length < pageSize) break
+    let query = supabase.from(table).select(select).order(orderBy, { ascending: true }).range(from, from + pageSize - 1)
+    for (const [k, v] of Object.entries(filters)) query = query.eq(k, v)
+    const { data } = await query
+    if (!data || data.length === 0) break
+    all.push(...(data as Record<string, unknown>[]))
+    if (data.length < pageSize) break
     from += pageSize
   }
-  const sp500Rows = sp500All
+  return all
+}
 
-  const bsi = bsiRows as Pick<BsiRow, 'week_date' | 'bsi_score' | 'avg_valence'>[] | null
+export async function getBsiHistory(): Promise<{
+  bsiData: BsiDataPoint[]
+  econData: Record<string, EconTimeSeries[]>
+}> {
+  const indicators = ['SP500', 'VIX', 'UNRATE', 'UMCSENT']
+  const bsiAll = await fetchPaginated('bsi_weekly', 'week_date, bsi_score, avg_valence', {}, 'week_date')
+
+  const econData: Record<string, EconTimeSeries[]> = {}
+  for (const ind of indicators) {
+    const rows = await fetchPaginated('economic_data', 'date, value', { indicator: ind }, 'date')
+    econData[ind] = rows.map((d) => ({
+      date: d.date as string,
+      value: Number(d.value ?? 0),
+    }))
+  }
+
   return {
-    bsiData: (bsi ?? []).map((d) => ({
-      date: d.week_date,
+    bsiData: bsiAll.map((d) => ({
+      date: d.week_date as string,
       bsi: Number(d.bsi_score),
       avgValence: Number(d.avg_valence ?? 0),
     })),
-    sp500Data: sp500Rows.map((d) => ({
-      date: d.date,
-      value: Number(d.value ?? 0),
-    })),
+    econData,
   }
+}
+
+// ─── Historical Events BSI Enrichment ─────────────────────────────────────
+
+import { historicalEvents, type HistoricalEvent } from '@/data/bsi-data'
+
+export async function getHistoricalEventsWithBsi(): Promise<HistoricalEvent[]> {
+  // Fetch all BSI data (already paginated)
+  const bsiAll = await fetchPaginated('bsi_weekly', 'week_date, bsi_score', {}, 'week_date')
+  const bsiDates = bsiAll.map(d => ({
+    date: d.week_date as string,
+    bsi: Number(d.bsi_score),
+  }))
+
+  return historicalEvents.map(event => {
+    // Find closest BSI week_date <= event.date
+    let closest: { date: string; bsi: number } | undefined
+    for (const b of bsiDates) {
+      if (b.date <= event.date) closest = b
+      else break
+    }
+    return { ...event, bsi: closest?.bsi ?? 0 }
+  })
 }
 
 // ─── This Week Tracks ─────────────────────────────────────────────────────

@@ -5,12 +5,15 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Unconventional Economic Indicators — Sad Index',
+  title: 'Unconventional Economic Indicators',
   description:
     'From pizza orders predicting wars to skirt lengths forecasting stocks — a curated museum of the weirdest (and surprisingly accurate) economic indicators ever created.',
   openGraph: {
     title: 'The Museum of Weird Economic Indicators',
     description: 'Pizza orders predict wars. Lipstick sales predict recessions. Music predicts everything.',
+  },
+  alternates: {
+    canonical: '/indicators',
   },
 }
 
@@ -132,9 +135,22 @@ function AccuracyBadge({ accuracy, color }: { accuracy: string; color: string })
   )
 }
 
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://sadindex.com' },
+    { '@type': 'ListItem', position: 2, name: 'Weird Indicators' },
+  ],
+}
+
 export default function IndicatorsPage() {
   return (
     <div className="min-h-screen flex flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <Navbar />
 
       <main className="flex-1 max-w-5xl mx-auto px-4 py-10 w-full">

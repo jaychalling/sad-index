@@ -13,6 +13,8 @@ const config: Config = {
         navy: "#023047",
         amber: "#ffb703",
         orange: "#fb8500",
+        happy: "#22c55e",
+        sad: "#ef4444",
       },
     },
   },

@@ -45,7 +45,7 @@ export interface CurrentWeek {
 export interface HistoricalEvent {
   date: string;
   label: string;
-  bsi: number;
+  bsi?: number; // populated dynamically from DB
 }
 
 // ─── Weekly BSI Data (monthly samples, 2000-01 to 2026-02) ──────────────────
@@ -872,30 +872,26 @@ export const topTracksThisWeek: Track[] = [
 // ─── Historical Events (chart annotations) ──────────────────────────────────
 
 export const historicalEvents: HistoricalEvent[] = [
-  { date: '2000-03-10', label: 'Dot-com Peak', bsi: 44 },
-  { date: '2001-09-11', label: '9/11 Attacks', bsi: 42 },
-  { date: '2001-11-01', label: 'Post-9/11 Escapism', bsi: 26 },
-  { date: '2002-10-09', label: 'Dot-com Bottom', bsi: 30 },
-  { date: '2005-08-29', label: 'Hurricane Katrina', bsi: 50 },
-  { date: '2007-10-09', label: 'S&P 500 Pre-Crisis Peak', bsi: 42 },
-  { date: '2008-03-16', label: 'Bear Stearns Collapse', bsi: 30 },
-  { date: '2008-09-15', label: 'Lehman Brothers Bankruptcy', bsi: 22 },
-  { date: '2008-10-01', label: 'Peak Escapism (GFC)', bsi: 20 },
-  { date: '2009-03-09', label: 'S&P 500 Bottom (666)', bsi: 22 },
-  { date: '2009-06-01', label: 'Recession Pop Peak', bsi: 24 },
-  { date: '2012-09-01', label: 'Gangnam Style', bsi: 47 },
-  { date: '2014-05-01', label: '"Happy" (Pharrell) Era', bsi: 40 },
-  { date: '2015-11-01', label: 'Adele "Hello" Peak', bsi: 53 },
-  { date: '2016-11-01', label: 'Post-Election Mood', bsi: 55 },
-  { date: '2020-03-11', label: 'COVID-19 Pandemic Declared', bsi: 65 },
-  { date: '2020-04-01', label: 'COVID Lockdown Peak Sadness', bsi: 70 },
-  { date: '2020-11-09', label: 'Pfizer Vaccine News', bsi: 28 },
-  { date: '2021-03-01', label: 'Vaccine Euphoria Peak', bsi: 20 },
-  { date: '2022-06-01', label: 'Bear Market + Vibecession', bsi: 43 },
-  { date: '2023-03-10', label: 'SVB Collapse', bsi: 43 },
-  { date: '2023-07-01', label: 'Eras Tour Mania', bsi: 44 },
-  { date: '2024-06-07', label: 'Brat Summer Begins', bsi: 38 },
-  { date: '2024-08-01', label: 'Peak Brat Summer', bsi: 30 },
-  { date: '2025-02-01', label: 'Kendrick GNX Dominance', bsi: 39 },
-  { date: '2026-02-24', label: 'Current Week', bsi: 31 },
+  // BSI values populated dynamically from bsi_weekly DB
+  { date: '2000-03-10', label: 'Dot-com Peak' },
+  { date: '2001-09-11', label: '9/11 Attacks' },
+  { date: '2001-11-01', label: 'Post-9/11 Escapism' },
+  { date: '2002-10-09', label: 'Dot-com Bottom' },
+  { date: '2005-08-29', label: 'Hurricane Katrina' },
+  { date: '2007-10-09', label: 'Pre-Crisis Peak' },
+  { date: '2008-09-15', label: 'Lehman Brothers Bankruptcy' },
+  { date: '2008-10-01', label: 'Peak Escapism (GFC)' },
+  { date: '2009-03-09', label: 'Market Bottom' },
+  { date: '2009-06-01', label: 'Recession Pop Peak' },
+  { date: '2012-09-01', label: 'Gangnam Style' },
+  { date: '2014-05-01', label: '"Happy" (Pharrell) Era' },
+  { date: '2015-11-01', label: 'Adele "Hello" Peak' },
+  { date: '2016-11-01', label: 'Post-Election Mood' },
+  { date: '2020-03-11', label: 'COVID-19 Pandemic Declared' },
+  { date: '2020-04-01', label: 'COVID Lockdown Peak Sadness' },
+  { date: '2020-11-09', label: 'Pfizer Vaccine News' },
+  { date: '2021-03-01', label: 'Vaccine Euphoria Peak' },
+  { date: '2022-06-01', label: 'Bear Market + Vibecession' },
+  { date: '2023-03-10', label: 'SVB Collapse' },
+  { date: '2024-08-01', label: 'Brat Summer Peak' },
 ];

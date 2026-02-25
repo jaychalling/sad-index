@@ -35,6 +35,11 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/indicators" className="text-teal hover:text-navy font-medium transition-colors">
+                  Weird Indicators
+                </Link>
+              </li>
+              <li>
                 <Link href="/about" className="text-teal hover:text-navy font-medium transition-colors">
                   About / Methodology
                 </Link>

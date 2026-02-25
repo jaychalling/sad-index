@@ -1,11 +1,75 @@
+import type { Metadata } from 'next'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
+import Link from 'next/link'
+import { ArrowRight } from 'lucide-react'
+
+export const metadata: Metadata = {
+  title: 'About — Methodology & Research Sources',
+  description:
+    'How we calculate the Billboard Sadness Index using Hot 100 valence data. Academic research, the "Recession Pop" phenomenon, and data sources explained.',
+  openGraph: {
+    title: 'About the Billboard Sadness Index',
+    description: 'Methodology, academic evidence, and data sources behind the BSI.',
+  },
+  alternates: {
+    canonical: '/about',
+  },
+}
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://sadindex.com' },
+    { '@type': 'ListItem', position: 2, name: 'About' },
+  ],
+}
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'What is the Billboard Sadness Index (BSI)?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'The Billboard Sadness Index tracks the emotional valence of Billboard Hot 100 songs weekly. It computes a rank-weighted sadness score from 0 (bright/euphoric) to 100 (dark/somber) using audio analysis.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Why do charts get brighter during recessions?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'People seek escapist music during hard times — they want to dance, not wallow. This "Recession Pop" pattern has repeated consistently over 25 years of data, including during the 2008 financial crisis and COVID-19.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'How is BSI calculated?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'BSI = Σ((1 - valence_i) × (1/rank_i)) / Σ(1/rank_i) × 100. Higher-ranked songs have more influence on the index. Valence (0.0 to 1.0) measures musical positivity using audio analysis.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'What data sources does Sad Index use?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Sad Index uses Billboard Hot 100 chart data, Essentia audio analysis library for computing valence, historical Spotify Audio Features data, and FRED API for economic indicators (S&P 500, VIX, unemployment rate, consumer sentiment).',
+      },
+    },
+  ],
+}
 
 const bsiRanges = [
   { range: '0–20', label: 'Euphoric', color: '#22c55e', bg: '#dcfce7', meaning: 'Strong escapism signal — people are coping through music' },
-  { range: '20–40', label: 'Bright', color: '#8ecae6', bg: '#e0f2fe', meaning: 'Potential underlying anxiety despite upbeat sound' },
+  { range: '20–40', label: 'Bright', color: '#4ade80', bg: '#dcfce7', meaning: 'Potential underlying anxiety despite upbeat sound' },
   { range: '40–60', label: 'Neutral', color: '#ffb703', bg: '#fef3c7', meaning: 'Normal times — balanced mix of moods' },
-  { range: '60–80', label: 'Moody', color: '#fb8500', bg: '#ffedd5', meaning: 'Social reflection — society processing something' },
+  { range: '60–80', label: 'Moody', color: '#f87171', bg: '#fee2e2', meaning: 'Social reflection — society processing something' },
   { range: '80–100', label: 'Dark', color: '#ef4444', bg: '#fee2e2', meaning: 'Rare — usually tied to national tragedy or crisis' },
 ]
 
@@ -59,6 +123,14 @@ const academicSources = [
 export default function AboutPage() {
   return (
     <div className="min-h-screen flex flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
       <Navbar />
 
       <main className="flex-1 max-w-4xl mx-auto px-4 py-10 w-full">
@@ -284,6 +356,30 @@ export default function AboutPage() {
               this should not be used as the sole basis for investment decisions.
             </p>
           </div>
+        </section>
+        {/* Related Pages */}
+        <section className="mt-8 grid sm:grid-cols-3 gap-4">
+          <Link href="/" className="card-brutal flex items-center justify-between group">
+            <div>
+              <p className="font-bold text-navy" style={{ fontFamily: 'var(--font-poppins)' }}>Today&apos;s BSI</p>
+              <p className="text-sm text-navy/60">Live dashboard</p>
+            </div>
+            <ArrowRight size={18} className="text-teal group-hover:translate-x-1 transition-transform" />
+          </Link>
+          <Link href="/this-week" className="card-brutal flex items-center justify-between group">
+            <div>
+              <p className="font-bold text-navy" style={{ fontFamily: 'var(--font-poppins)' }}>This Week</p>
+              <p className="text-sm text-navy/60">Track-by-track breakdown</p>
+            </div>
+            <ArrowRight size={18} className="text-teal group-hover:translate-x-1 transition-transform" />
+          </Link>
+          <Link href="/history" className="card-brutal flex items-center justify-between group">
+            <div>
+              <p className="font-bold text-navy" style={{ fontFamily: 'var(--font-poppins)' }}>Full Timeline</p>
+              <p className="text-sm text-navy/60">25 years of data</p>
+            </div>
+            <ArrowRight size={18} className="text-teal group-hover:translate-x-1 transition-transform" />
+          </Link>
         </section>
       </main>
 

@@ -16,13 +16,23 @@ interface WeekHighlightProps {
   mostHappyTrack: TrackInfo
 }
 
-function ValenceBar({ valence, color }: { valence: number; color: string }) {
+function ValenceBar({ valence }: { valence: number; color: string }) {
+  const pct = Math.abs(valence - 0.5) / 0.5 * 50
+  const isHappy = valence >= 0.5
   return (
-    <div className="w-full h-4 bg-navy/10 rounded-full border-[2px] border-navy overflow-hidden">
-      <div
-        className="h-full rounded-full transition-all duration-700"
-        style={{ width: `${valence * 100}%`, backgroundColor: color }}
-      />
+    <div className="w-full relative h-4 bg-navy/5 rounded-full border-[2px] border-navy overflow-hidden">
+      <div className="absolute left-1/2 top-0 bottom-0 w-px bg-navy/25 z-10" />
+      {isHappy ? (
+        <div
+          className="absolute top-0 bottom-0 rounded-r-full transition-all duration-700"
+          style={{ left: '50%', width: `${pct}%`, backgroundColor: '#22c55e' }}
+        />
+      ) : (
+        <div
+          className="absolute top-0 bottom-0 rounded-l-full transition-all duration-700"
+          style={{ right: '50%', width: `${pct}%`, backgroundColor: '#ef4444' }}
+        />
+      )}
     </div>
   )
 }
@@ -55,14 +65,14 @@ function TrackCard({
       </h4>
       <p className="text-navy/60 text-sm mt-0.5">{track.artist}</p>
       <div className="mt-3">
-        <div className="flex justify-between text-xs text-navy/60 mb-1">
-          <span>{isSad ? 'Sadness' : 'Happiness'}</span>
-          <span>Valence: {(track.valence * 100).toFixed(0)}/100</span>
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] font-bold" style={{ color: '#ef4444' }}>Sad</span>
+          <div className="flex-1">
+            <ValenceBar valence={track.valence} color="" />
+          </div>
+          <span className="text-[11px] font-bold" style={{ color: '#22c55e' }}>Happy</span>
         </div>
-        <ValenceBar
-          valence={track.valence}
-          color={isSad ? '#219ebc' : '#ffb703'}
-        />
+        <p className="text-[10px] text-navy/50 text-center mt-1">Valence: {(track.valence * 100).toFixed(0)}/100</p>
       </div>
     </div>
   )

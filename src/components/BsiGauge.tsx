@@ -6,11 +6,11 @@ interface BsiGaugeProps {
 }
 
 const segments = [
-  { min: 0, max: 20, label: 'Euphoric', color: '#22c55e' },
-  { min: 20, max: 40, label: 'Bright', color: '#8ecae6' },
-  { min: 40, max: 60, label: 'Neutral', color: '#ffb703' },
-  { min: 60, max: 80, label: 'Moody', color: '#fb8500' },
-  { min: 80, max: 100, label: 'Dark', color: '#ef4444' },
+  { min: 0, max: 20, label: 'Very Happy', color: '#22c55e' },
+  { min: 20, max: 40, label: 'Happy', color: '#4ade80' },
+  { min: 40, max: 60, label: 'Mixed', color: '#ffb703' },
+  { min: 60, max: 80, label: 'Sad', color: '#f87171' },
+  { min: 80, max: 100, label: 'Very Sad', color: '#ef4444' },
 ]
 
 function getSegment(value: number) {
@@ -18,11 +18,11 @@ function getSegment(value: number) {
 }
 
 function getInterpretation(value: number): string {
-  if (value < 20) return 'Charts are unusually bright — historically a pre-recession signal'
-  if (value < 40) return 'Upbeat mood dominates the charts — people are vibing'
-  if (value < 60) return 'A balanced emotional mix on the charts — business as usual'
-  if (value < 80) return 'Melancholy is creeping in — watch for cultural shifts'
-  return 'Deep sadness dominates the charts — often mirrors economic anxiety'
+  if (value < 20) return 'Charts are unusually happy — when people escape into upbeat music, economic stress may be lurking'
+  if (value < 40) return 'Upbeat mood dominates — the charts sound optimistic'
+  if (value < 60) return 'A balanced emotional mix — business as usual on the charts'
+  if (value < 80) return 'Sadder songs are gaining traction — the mood is shifting'
+  return 'Deep sadness dominates — the charts reflect genuine emotional weight'
 }
 
 function getEmoji(value: number): string {
@@ -135,7 +135,7 @@ export default function BsiGauge({ value, prevValue }: BsiGaugeProps) {
       <div className="mt-2 flex items-center justify-center gap-3">
         <span
           className="tag-brutal text-base"
-          style={{ backgroundColor: segment.color, color: segment.color === '#ffb703' || segment.color === '#8ecae6' ? '#023047' : '#fff' }}
+          style={{ backgroundColor: segment.color, color: segment.color === '#ffb703' || segment.color === '#4ade80' ? '#023047' : '#fff' }}
         >
           {getEmoji(value)} {segment.label}
         </span>
