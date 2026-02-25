@@ -108,12 +108,12 @@ export default async function Home() {
               BSI
             </div>
             <div className="relative">
-              <div className="flex items-center gap-2 mb-4">
+              <p className="flex items-center gap-2 mb-4">
                 <Music size={16} className="text-ocean" />
-                <h1 className="text-xs font-bold uppercase tracking-widest text-ocean">
+                <span className="text-xs font-bold uppercase tracking-widest text-ocean">
                   Billboard Sadness Index
-                </h1>
-              </div>
+                </span>
+              </p>
               <div className="flex items-end gap-4 mb-3">
                 <span
                   className="text-6xl md:text-7xl font-extrabold leading-none"
@@ -131,6 +131,9 @@ export default async function Home() {
                   </span>
                 </div>
               </div>
+              <h1 className="text-lg font-bold text-white/90 mt-1 mb-2" style={{ fontFamily: 'var(--font-poppins)' }}>
+                Is America Sad Right Now?
+              </h1>
               <div className="flex flex-wrap items-center gap-3 text-sm">
                 <span className={change > 0 ? 'text-orange' : change < 0 ? 'text-happy' : 'text-white/60'}>
                   {change > 0 ? '\u25B2' : change < 0 ? '\u25BC' : '\u25CF'}{' '}
