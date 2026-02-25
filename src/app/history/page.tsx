@@ -7,13 +7,13 @@ import { ArrowRight } from 'lucide-react'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'BSI History — 25 Years of Billboard Mood Data (2000–2026)',
+  title: 'Mood History — 25 Years of National Mood Data (2000–2026)',
   description:
-    'Explore 25 years of Billboard mood data. See how chart sadness predicted the 2008 crash, COVID, and more. Interactive timeline with economic overlay.',
+    'Explore 25 years of national mood data: Music Sadness, Market Fear, Consumer Gloom, and Job Anxiety. See how mood indices predicted the 2008 crash, COVID, and more.',
   openGraph: {
-    title: 'BSI History: 25 Years of Billboard Mood Data',
+    title: 'Mood History: 25 Years of National Mood Data',
     description:
-      'Interactive timeline of Billboard emotional valence from 2000 to present, overlaid with economic indicators.',
+      'Interactive timeline of 4 mood indices from 2000 to present — music, markets, consumers, and jobs.',
   },
   alternates: {
     canonical: '/history',
@@ -45,13 +45,13 @@ export default async function HistoryPage() {
             className="text-3xl md:text-4xl font-bold text-navy mb-2"
             style={{ fontFamily: 'var(--font-poppins)' }}
           >
-            BSI History
+            Mood History
           </h1>
           <p className="text-teal font-medium text-lg">
-            2000 to Present — 25 years of musical mood data
+            2000 to Present — 25 years of national mood data across 4 indices
           </p>
         </div>
-        <HistoryClient bsiData={bsiData} historicalEvents={enrichedEvents.filter(e => e.date >= '2000-01-01')} umcsentData={econData['UMCSENT'] ?? []} />
+        <HistoryClient bsiData={bsiData} historicalEvents={enrichedEvents.filter(e => e.date >= '2000-01-01')} econData={econData} />
 
         {/* Related Pages */}
         <section className="mt-12 grid sm:grid-cols-2 gap-4">

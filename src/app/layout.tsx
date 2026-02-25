@@ -18,11 +18,11 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://sadindex.com"),
   title: {
-    default: "Sad Index — Is America Sad Right Now? | Billboard Sadness Index",
+    default: "Sad Index — National Mood Dashboard | 4 Indices Tracking America's Mood",
     template: "%s | Sad Index",
   },
   description:
-    "Track the emotional mood of Billboard Hot 100 hits weekly. When charts get bright, recessions follow. 25 years of data since 2000.",
+    "4 indices tracking America's mood: Music Sadness, Market Fear, Consumer Gloom, and Job Anxiety. Combined into the National Mood Score. 25 years of data.",
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },

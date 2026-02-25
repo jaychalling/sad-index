@@ -16,6 +16,7 @@ import {
 } from 'recharts'
 import type { BsiDataPoint, HistoricalEvent } from '@/data/bsi-data'
 import type { EconTimeSeries } from '@/lib/queries'
+import { vixToFear, umcsentToGloom, unrateToAnxiety, calcNMS, indexColors, indexLabels } from '@/lib/mood-indices'
 
 const eventDescriptions: Record<string, string> = {
   '2001-11-01': 'Charts turned euphoric as escapism — people craved upbeat pop after 9/11.',
@@ -53,13 +54,14 @@ function getMoodLabel(bsi: number): string {
 interface HistoryClientProps {
   bsiData: BsiDataPoint[]
   historicalEvents: HistoricalEvent[]
-  umcsentData: EconTimeSeries[]
+  econData: Record<string, EconTimeSeries[]>
 }
 
-type ChartView = 'bsi' | 'bsi-vs-sentiment'
+type ChartView = 'national-mood' | 'bsi' | 'bsi-vs-sentiment'
 
-export default function HistoryClient({ bsiData, historicalEvents, umcsentData }: HistoryClientProps) {
-  const [chartView, setChartView] = useState<ChartView>('bsi')
+export default function HistoryClient({ bsiData, historicalEvents, econData }: HistoryClientProps) {
+  const [chartView, setChartView] = useState<ChartView>('national-mood')
+  const umcsentData = econData['UMCSENT'] ?? []
 
   // Merge BSI + UMCSENT data by month for comparison chart
   const mergedData = (() => {
@@ -103,7 +105,13 @@ export default function HistoryClient({ bsiData, historicalEvents, umcsentData }
   return (
     <>
       {/* Chart Toggle */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex flex-wrap gap-2 mb-6">
+        <button
+          onClick={() => setChartView('national-mood')}
+          className={`btn-brutal text-sm ${chartView === 'national-mood' ? 'bg-teal text-white' : 'bg-white text-navy'}`}
+        >
+          National Mood (All Indices)
+        </button>
         <button
           onClick={() => setChartView('bsi')}
           className={`btn-brutal text-sm ${chartView === 'bsi' ? 'bg-teal text-white' : 'bg-white text-navy'}`}
@@ -114,9 +122,110 @@ export default function HistoryClient({ bsiData, historicalEvents, umcsentData }
           onClick={() => setChartView('bsi-vs-sentiment')}
           className={`btn-brutal text-sm ${chartView === 'bsi-vs-sentiment' ? 'bg-teal text-white' : 'bg-white text-navy'}`}
         >
-          BSI vs Consumer Sentiment
+          BSI vs Sentiment
         </button>
       </div>
+
+      {/* National Mood: All 4 Indices */}
+      {chartView === 'national-mood' && (() => {
+        const vixMap = new Map<string, number>()
+        const umcMap = new Map<string, number>()
+        const unrMap = new Map<string, number>()
+        for (const d of econData['VIX'] ?? []) vixMap.set(d.date.slice(0, 7), d.value)
+        for (const d of econData['UMCSENT'] ?? []) umcMap.set(d.date.slice(0, 7), d.value)
+        for (const d of econData['UNRATE'] ?? []) unrMap.set(d.date.slice(0, 7), d.value)
+
+        const seen = new Set<string>()
+        const moodData = bsiData
+          .filter(d => { const ym = d.date.slice(0, 7); if (seen.has(ym)) return false; seen.add(ym); return true })
+          .map(d => {
+            const ym = d.date.slice(0, 7)
+            const findClosest = (map: Map<string, number>) => {
+              let v = map.get(ym) ?? null
+              if (v != null) return v
+              for (let i = 1; i <= 3; i++) {
+                const dt = new Date(d.date); dt.setMonth(dt.getMonth() - i)
+                const prev = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}`
+                v = map.get(prev) ?? null; if (v != null) return v
+              }
+              return null
+            }
+            const vixRaw = findClosest(vixMap)
+            const umcRaw = findClosest(umcMap)
+            const unrRaw = findClosest(unrMap)
+            const bsi = Math.round(d.bsi * 10) / 10
+            const fear = vixRaw != null ? Math.round(vixToFear(vixRaw) * 10) / 10 : null
+            const gloom = umcRaw != null ? Math.round(umcsentToGloom(umcRaw) * 10) / 10 : null
+            const anxiety = unrRaw != null ? Math.round(unrateToAnxiety(unrRaw) * 10) / 10 : null
+            const nms = fear != null && gloom != null && anxiety != null ? Math.round(calcNMS(bsi, fear, gloom, anxiety) * 10) / 10 : null
+            return { date: d.date, bsi, fear, gloom, anxiety, nms }
+          })
+
+        return (
+          <div className="card-brutal mb-12 p-4 md:p-8">
+            <h2 className="text-xl font-bold text-navy mb-2" style={{ fontFamily: 'var(--font-poppins)' }}>
+              National Mood Over Time
+            </h2>
+            <p className="text-sm text-navy/60 mb-6">
+              All 4 indices normalized to 0–100. The dashed NMS line is the weighted composite.
+            </p>
+            <div className="flex flex-wrap gap-3 mb-4 text-xs">
+              {[
+                { key: 'bsi', label: indexLabels.bsi, color: indexColors.bsi },
+                { key: 'fear', label: indexLabels.fear, color: indexColors.fear },
+                { key: 'gloom', label: indexLabels.gloom, color: indexColors.gloom },
+                { key: 'anxiety', label: indexLabels.anxiety, color: indexColors.anxiety },
+                { key: 'nms', label: indexLabels.nms, color: indexColors.nms },
+              ].map(t => (
+                <span key={t.key} className="flex items-center gap-1.5 font-semibold" style={{ color: t.color }}>
+                  <span className="w-3 h-3 rounded-sm" style={{ backgroundColor: t.color, border: `1px solid ${t.color}` }} />
+                  {t.label}
+                </span>
+              ))}
+            </div>
+            <div className="w-full h-[400px] md:h-[500px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={moodData} margin={{ top: 20, right: 20, bottom: 20, left: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#023047" opacity={0.08} />
+                  <XAxis
+                    dataKey="date"
+                    tick={{ fontSize: 10, fill: '#023047' }}
+                    tickFormatter={(v: string) => `'${v.slice(2, 4)}`}
+                    minTickGap={40}
+                    axisLine={{ stroke: '#023047', strokeWidth: 1, opacity: 0.2 }}
+                    tickLine={false}
+                  />
+                  <YAxis domain={[0, 100]} tick={{ fontSize: 10, fill: '#023047' }} tickLine={false} axisLine={false} width={28} />
+                  <Tooltip
+                    content={({ active, payload, label }) => {
+                      if (!active || !payload?.length) return null
+                      return (
+                        <div className="bg-white border-[2px] border-navy rounded-lg p-3 shadow-[2px_2px_0_#023047] text-sm min-w-[180px]">
+                          <p className="font-bold text-navy mb-2 text-xs border-b border-navy/10 pb-1">{label}</p>
+                          {payload.map((entry) => (
+                            <div key={entry.dataKey as string} className="flex items-center gap-2 py-0.5">
+                              <span className="w-3 h-3 rounded-sm flex-shrink-0" style={{ backgroundColor: entry.color as string }} />
+                              <span className="text-navy/70 text-xs">{entry.name}:</span>
+                              <span className="font-bold ml-auto text-xs" style={{ color: entry.color as string }}>
+                                {typeof entry.value === 'number' ? (entry.value as number).toFixed(1) : '—'}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )
+                    }}
+                  />
+                  <Line type="monotone" dataKey="bsi" name={indexLabels.bsi} stroke={indexColors.bsi} strokeWidth={1.5} dot={false} connectNulls />
+                  <Line type="monotone" dataKey="fear" name={indexLabels.fear} stroke={indexColors.fear} strokeWidth={1.5} dot={false} connectNulls />
+                  <Line type="monotone" dataKey="gloom" name={indexLabels.gloom} stroke={indexColors.gloom} strokeWidth={1.5} dot={false} connectNulls />
+                  <Line type="monotone" dataKey="anxiety" name={indexLabels.anxiety} stroke={indexColors.anxiety} strokeWidth={1.5} dot={false} connectNulls />
+                  <Line type="monotone" dataKey="nms" name={indexLabels.nms} stroke={indexColors.nms} strokeWidth={2.5} strokeDasharray="6 3" dot={false} connectNulls />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        )
+      })()}
 
       {/* Main BSI Chart */}
       {chartView === 'bsi' && (
